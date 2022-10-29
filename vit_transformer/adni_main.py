@@ -1,14 +1,22 @@
 import torchvision
 from torchvision.transforms import ToTensor
-
-train_ds = torchvision.datasets.ImageFolder('/content/train/', transform=ToTensor())
-valid_ds = torchvision.datasets.ImageFolder('/content/valid/', transform=ToTensor())
-test_ds = torchvision.datasets.ImageFolder('/content/test/', transform=ToTensor())
-
+from transformers import ViTFeatureExtractor
+import torch.nn as nn
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
 from transformers import ViTModel
 from transformers.modeling_outputs import SequenceClassifierOutput
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.data as data
+from torch.autograd import Variable
+import numpy as np
+
+
+train_ds = torchvision.datasets.ImageFolder('/content/train/', transform=ToTensor())
+valid_ds = torchvision.datasets.ImageFolder('/content/valid/', transform=ToTensor())
+test_ds = torchvision.datasets.ImageFolder('/content/test/', transform=ToTensor())
 
 class ViTForImageClassification(nn.Module):
     def __init__(self, num_labels=3):
@@ -35,10 +43,6 @@ class ViTForImageClassification(nn.Module):
 EPOCHS = 3
 BATCH_SIZE = 10
 LEARNING_RATE = 2e-5
-
-from transformers import ViTFeatureExtractor
-import torch.nn as nn
-import torch
 # Define Model
 model = ViTForImageClassification(len(train_ds.classes))    
 # Feature Extractor
@@ -51,10 +55,6 @@ loss_func = nn.CrossEntropyLoss()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
 if torch.cuda.is_available():
     model.cuda() 
-    
-import torch.utils.data as data
-from torch.autograd import Variable
-import numpy as np
 
 print("Number of train samples: ", len(train_ds))
 print("Number of test samples: ", len(test_ds))
@@ -104,8 +104,6 @@ for epoch in range(EPOCHS):
       # Calculate Accuracy
       accuracy = (test_output == test_y).sum().item() / BATCH_SIZE
       print('Epoch: ', epoch, '| train loss: %.4f' % loss, '| test accuracy: %.2f' % accuracy)
-  import matplotlib.pyplot as plt
-import numpy as np
 
 EVAL_BATCH = 1
 eval_loader  = data.DataLoader(valid_ds, batch_size=EVAL_BATCH, shuffle=True, num_workers=4) 
@@ -140,5 +138,5 @@ with torch.no_grad():
   plt.ylim(224,0)
   plt.title(f'Prediction: {value_predicted} - Actual target: {value_target}')
   plt.show()
-  
-  torch.save(model, '/content/model.pt')
+    
+torch.save(model, '/content/model.pt')
